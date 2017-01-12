@@ -36,7 +36,7 @@ thread_lock = Lock()
 # Create a server TCP socket and allow address re-use
 s = socket(AF_INET, SOCK_STREAM)
 s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-s.bind(('localhost', args.port))
+s.bind(('112.213.86.238', args.port))
 
 # Create a list in which threads will be stored in order to be joined later
 threads = []
@@ -58,11 +58,18 @@ class ClientHandler(Thread):
     # Define the actions the thread will execute when called.
     def run(self):
         global counter
-        self.socket.send(self.response_message + str(counter))
-        # Lock the changing of the shared counter value to prevent erratic multithread changing behavior
-        with self.lock:
-            counter += 1
-        self.socket.close()
+	while 1:
+    	    data = self.socket.recv(1024)
+	    if not data: break
+	    print data
+   	    self.socket.send(data)
+        
+	    # Lock the changing of the shared counter value to prevent erratic multithread changing behavior
+            with self.lock:
+               counter += 1
+
+	print "close socket"
+	self.socket.close()
 
 #-----------------------------------------------#
 ########## MAIN-THREAD SERVER INSTANCE ##########
